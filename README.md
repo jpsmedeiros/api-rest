@@ -3,4 +3,7 @@ Desenvolvendo uma API no estilo REST utilizando o node.js
 
 
 ## Instructions
-- Run de command <b>nodemon index.js</b>
+- Instale o node
+- Instale o npm
+- (Optional) instale o nodemon. 
+- Run de command <b>node index.js</b> (Ou nodemon index.js)
