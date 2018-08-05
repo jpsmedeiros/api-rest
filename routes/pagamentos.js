@@ -13,6 +13,12 @@ module.exports = function(app){
         pagamento.status = "CRIADO";
         pagamento.data = new Date;
 
-        res.send(pagamento);
+        var connection = app.persistence.connectionFactory();
+        var pagamentoDao = new app.persistence.PagamentoDao(connection);
+
+        pagamentoDao.salva(pagamento, function(erro, resultado){
+            console.log("pagamento criado");
+            res.json(pagamento);
+        });
     });
 }
