@@ -6,19 +6,52 @@ module.exports = function(app){
     });
 
     app.post('/pagamentos/pagamento', function(req, res){
-        var pagamento = req.body;
-        console.log('processando novo pagamento');
 
-        // TODO pagamento vazio
+        var pagamento = req.body;
         pagamento.status = "CRIADO";
         pagamento.data = new Date;
+
+        var erros = validaPagamento(req);
+
+        if(erros){
+            enviaErro(res, erros);
+            return;
+        }
+
+        
+        console.log('processando novo pagamento');
 
         var connection = app.persistence.connectionFactory();
         var pagamentoDao = new app.persistence.PagamentoDao(connection);
 
         pagamentoDao.salva(pagamento, function(erro, resultado){
-            console.log("pagamento criado");
-            res.json(pagamento);
+            if(erro){
+                console.log("erro ao inserir no banco:" + erro);
+                res.status(400).send(erro);
+            } else{
+                console.log("pagamento criado");
+                res.json(pagamento);
+            }
         });
     });
+
+    function validaPagamento(req){
+        req.assert("forma_de_pagamento", 
+            "Forma de pagamento é obrigatória").notEmpty();
+        req.assert("valor", "Valor é obrigatório e deve ser um decimal").notEmpty().isFloat();
+        req.assert("moeda", 
+            "moeda é obrigatória").notEmpty();
+        req.assert("status", 
+        "status é obrigatório").notEmpty();
+        var erros = req.validationErrors();
+
+        if(erros){
+            console.log("erros de validação encontrados");
+        }
+        return erros;
+    }
+
+    function enviaErro(res, erro){
+        res.status(400).send(erro);
+    }
 }
