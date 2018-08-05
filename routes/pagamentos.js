@@ -14,7 +14,7 @@ module.exports = function(app){
         var erros = validaPagamento(req);
 
         if(erros){
-            enviaErro(res, erros);
+            res.status(400).send(erros);
             return;
         }
 
@@ -27,15 +27,18 @@ module.exports = function(app){
         pagamentoDao.salva(pagamento, function(erro, resultado){
             if(erro){
                 console.log("erro ao inserir no banco:" + erro);
-                res.status(400).send(erro);
+                res.status(500).send(erro);
             } else{
                 console.log("pagamento criado");
-                res.json(pagamento);
+                res.location("/pagamentos/pagamento/" +
+                    resultado.insertId);
+                res.status(201).json(pagamento);
             }
         });
     });
 
     function validaPagamento(req){
+        // TODO realizar verificações de tamanho e demais verificações
         req.assert("forma_de_pagamento", 
             "Forma de pagamento é obrigatória").notEmpty();
         req.assert("valor", "Valor é obrigatório e deve ser um decimal").notEmpty().isFloat();
@@ -51,7 +54,7 @@ module.exports = function(app){
         return erros;
     }
 
-    function enviaErro(res, erro){
-        res.status(400).send(erro);
+    function enviaStatus(res, status, msg){
+        
     }
 }
